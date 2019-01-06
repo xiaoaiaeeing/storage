@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     private ImageView imageView1;   //发证
     private ImageView imageView2;   //复制
+    private ImageView imageView3;   //复制比对
 
     /**
      * 保存随机数
@@ -89,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mtextview = (TextView) findViewById(R.id.tv_select_num);
         imageView1 = (ImageView) findViewById(R.id.my_fa);
         imageView2 = (ImageView) findViewById(R.id.my_copy);
+        imageView3 = (ImageView) findViewById(R.id.my_comapre);
     }
 
     /**
@@ -99,6 +101,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mtextview.setOnClickListener(this);
         imageView1.setOnClickListener(this);
         imageView2.setOnClickListener(this);
+        imageView3.setOnClickListener(this);
+
     }
 
     @Override
@@ -138,7 +142,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 intent = new Intent(MainActivity.this, CopyActivity.class);
                 startActivity(intent);
                 break;
-
+            case R.id.my_comapre:
+                intent = new Intent(MainActivity.this,CompareActivity.class);
+                startActivity(intent);
+                break;
+            default:
+                break;
         }
     }
 

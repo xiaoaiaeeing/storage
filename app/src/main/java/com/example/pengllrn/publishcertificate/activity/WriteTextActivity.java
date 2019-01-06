@@ -8,13 +8,18 @@ import android.nfc.Tag;
 import android.nfc.tech.MifareUltralight;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.widget.Toast;
 
 import com.example.pengllrn.publishcertificate.R;
 import com.example.pengllrn.publishcertificate.base.BaseNfcActivity;
+import com.example.pengllrn.publishcertificate.constant.Constant;
+import com.example.pengllrn.publishcertificate.internet.OkHttp;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -27,12 +32,25 @@ import okhttp3.Response;
 public class WriteTextActivity extends BaseNfcActivity {
     private String mText = "";  //保存证书
     private Intent intent;
-    private String result = "";//uid
     private String temp = "";
     private String mlogo;   //保存品牌
     private String mtype;   //保存随机产生的四位随机数
     private String num_zouyun = "";  //保存发送给服务器的证书
     private String uid_zouyun = ""; //保存发送给服务器的uid；
+    private String applyUrl = Constant.SERVER_URL;
+
+    Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            // TODO Auto-generated method stub
+            switch (msg.what) {
+                case 0x2020:
+
+            }
+            super.handleMessage(msg);
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,26 +93,17 @@ public class WriteTextActivity extends BaseNfcActivity {
             num_zouyun = num_zouyun + mstr;
         }
 
-        /** 得到发给服务器的uid*/
-        for(int i = 0; i < 6; i++){
-            char a = result.charAt(i);
-            uid_zouyun = uid_zouyun + a;
-        }
-        for (int i = 8; i < 16; i++){
-            char a = result.charAt(i);
-            uid_zouyun = uid_zouyun + a;
-        }
-
-
         System.out.println("拼接过后的证书为：" + num_zouyun);
         System.out.println("发给服务器的uid为：" + uid_zouyun);
         System.out.println("品牌为：" + mlogo + "   " + "发证类型为：" + mtype + "    " + "证书为：" + num_zouyun
-                + " " + "uid为：" + uid_zouyun + "    " + "状态位为：" + temp);
+                + " " + "uid为：" + uid_zouyun + "    " + "  " + "状态位为：" + temp);
 //        num_zouyun = "";
 //        uid_zouyun = "";
         if((mlogo != "") && (mtype != "") && (num_zouyun.length() == 8) && (uid_zouyun.length() == 14))
         {
-            sendRequestWithOkHttp();
+//            sendRequestWithOkHttp();
+            OkHttp okHttp = new OkHttp(getApplicationContext(),mHandler);
+            okHttp.getFromInternet(applyUrl);
             Toast.makeText(WriteTextActivity.this, "发证成功", Toast.LENGTH_SHORT).show();
         }else{
             System.out.println("发证失败");
@@ -103,7 +112,6 @@ public class WriteTextActivity extends BaseNfcActivity {
 
         num_zouyun = "";
         uid_zouyun = "";
-
     }
 
     /** 写非ndef格式数据
@@ -131,9 +139,8 @@ public class WriteTextActivity extends BaseNfcActivity {
 
     /** 读uid和状态位*/
     private void analysisTag(Tag tag) {
-
+        String result = "";//uid
         if (tag != null) {
-            //mView.restUI();
             MifareUltralight mifare = MifareUltralight.get(tag);
             try {
                 mifare.connect();
@@ -146,6 +153,16 @@ public class WriteTextActivity extends BaseNfcActivity {
                     result += temp;
                 }
 
+                /** 得到发给服务器的uid*/
+                for(int i = 0; i < 6; i++){
+                    char a = result.charAt(i);
+                    uid_zouyun = uid_zouyun + a;
+                }
+                for (int i = 8; i < 16; i++){
+                    char a = result.charAt(i);
+                    uid_zouyun = uid_zouyun + a;
+                }
+
                 temp = "";
                 int move = 0x80;
                 byte[] transceive = mifare.transceive(new byte[]{0x30, -128});
@@ -156,7 +173,119 @@ public class WriteTextActivity extends BaseNfcActivity {
                 }
 
             }catch (Exception e){
-                System.out.println("读状态位异常");
+                boolean isContains = Arrays.asList(Constant.UIDARRAY).contains(uid_zouyun);
+                int postion = 0;
+                int uidCase = 0;
+                if (isContains) {
+                    for (int i = 0;i < Constant.UIDARRAY.length;i++) {
+                        if (Constant.UIDARRAY[i].equals(uid_zouyun)) {
+                            postion = i + 1;
+                        }
+                    }
+                    uidCase = postion % 32;
+                    switch (uidCase) {
+                        case 0:
+                            temp = "00000";
+                            break;
+                        case 1:
+                            temp = "00001";
+                            break;
+                        case 2:
+                            temp = "00010";
+                            break;
+                        case 3:
+                            temp = "00011";
+                            break;
+                        case 4:
+                            temp = "00100";
+                            break;
+                        case 5:
+                            temp = "00101";
+                            break;
+                        case 6:
+                            temp = "00110";
+                            break;
+                        case 7:
+                            temp = "00111";
+                            break;
+                        case 8:
+                            temp = "01000";
+                            break;
+                        case 9:
+                            temp = "01001";
+                            break;
+                        case 10:
+                            temp = "01010";
+                            break;
+                        case 11:
+                            temp = "01011";
+                            break;
+                        case 12:
+                            temp = "01100";
+                            break;
+                        case 13:
+                            temp = "01101";
+                            break;
+                        case 14:
+                            temp = "01110";
+                            break;
+                        case 15:
+                            temp = "01111";
+                            break;
+                        case 16:
+                            temp = "10000";
+                            break;
+                        case 17:
+                            temp = "10001";
+                            break;
+                        case 18:
+                            temp = "10010";
+                            break;
+                        case 19:
+                            temp = "10011";
+                            break;
+                        case 20:
+                            temp = "10100";
+                            break;
+                        case 21:
+                            temp = "10101";
+                            break;
+                        case 22:
+                            temp = "10110";
+                            break;
+                        case 23:
+                            temp = "10111";
+                            break;
+                        case 24:
+                            temp = "11000";
+                            break;
+                        case 25:
+                            temp = "11001";
+                            break;
+                        case 26:
+                            temp = "11010";
+                            break;
+                        case 27:
+                            temp = "11011";
+                            break;
+                        case 28:
+                            temp = "11100";
+                            break;
+                        case 29:
+                            temp = "11101";
+                            break;
+                        case 30:
+                            temp = "11110";
+                            break;
+                        case 31:
+                            temp = "11111";
+                            break;
+                        default:
+                            break;
+                    }
+                } else {
+                    temp = "";
+                }
 
             }
             try {
@@ -188,21 +317,21 @@ public class WriteTextActivity extends BaseNfcActivity {
     }
 
     /** 向服务器发送请求测试*/
-    public void sendRequestWithOkHttp(){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try{
-                    OkHttpClient client = new OkHttpClient();
-                    Request request = new Request.Builder()
-                            .url("http://47.107.37.50:8000/get_school_property/?schoolid=7")
-                            .build();
-                    Response response = client.newCall(request).execute();
-                    System.out.println("发送网络请求是否成功：" + response.isSuccessful());
-                }catch(Exception e){
-
-                }
-            }
-        }).start();
-    }
+//    public void sendRequestWithOkHttp(){
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                try{
+//                    OkHttpClient client = new OkHttpClient();
+//                    Request request = new Request.Builder()
+//                            .url("http://47.107.37.50:8000/get_school_property/?schoolid=7")
+//                            .build();
+//                    Response response = client.newCall(request).execute();
+//                    System.out.println("发送网络请求是否成功：" + response.isSuccessful());
+//                }catch(Exception e){
+//
+//                }
+//            }
+//        }).start();
+//    }
 }

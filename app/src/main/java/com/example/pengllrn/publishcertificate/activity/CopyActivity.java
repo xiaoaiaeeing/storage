@@ -17,6 +17,7 @@ import com.example.pengllrn.publishcertificate.internet.OkHttp;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 
 /**
  * Created by pengllrn on 2019/1/4.
@@ -24,13 +25,12 @@ import java.nio.charset.Charset;
 
 public class CopyActivity extends BaseNfcActivity {
 
-    private String cText;//复制的证书
+    private String cText = "";//复制的证书
     private String mlogo;
     private String mtype;
-    private String result;//uid
-    private String temp;//状态位
-    private String certi_server;//发给服务器的证书
-    private String uid_server;//发给服务器的uid
+    private String temp = "";//状态位
+    private String certi_server = "";//发给服务器的证书
+    private String uid_server = "";//发给服务器的uid
     private String applyUrl = Constant.SERVER_URL;
 
     Handler mHandler = new Handler() {
@@ -90,25 +90,20 @@ public class CopyActivity extends BaseNfcActivity {
             certi_server = certi_server + mstr;
         }
 
-        /**
-         * 得到发给服务器的uid
-         */
-        for(int i = 0; i < 6; i++){
-            char a = result.charAt(i);
-            uid_server = uid_server + a;
-        }
-        for (int i = 8; i < 16; i++){
-            char a = result.charAt(i);
-            uid_server = uid_server + a;
-        }
+        System.out.println("发给服务器的uid为：" + uid_server);
+        System.out.println("品牌为：" + mlogo + "   " + "发证类型为：" + mtype + "    " + "证书为：" + certi_server
+                + " " + "uid为：" + uid_server + "    " + "状态位为：" + temp);
 
-        if ((mlogo != "") && (mtype != "")) {
+        if ((mlogo != "") && (mtype != "") && (certi_server.length() == 8) && (uid_server.length() == 14)) {//根据服务器，判断条件需修改
             OkHttp okHttp = new OkHttp(getApplicationContext(),mHandler);
             okHttp.getFromInternet(applyUrl);
             Toast.makeText(CopyActivity.this, "发证成功", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(CopyActivity.this, "请选择品牌或者单双证类型", Toast.LENGTH_SHORT).show();
         }
+
+        certi_server = "";
+        uid_server = "";
     }
 
     /**
@@ -138,9 +133,8 @@ public class CopyActivity extends BaseNfcActivity {
      * @param tag
      */
     private void analysisTag(Tag tag) {
-
+        String result = "";//uid
         if (tag != null) {
-            //mView.restUI();
             MifareUltralight mifare = MifareUltralight.get(tag);
             try {
                 mifare.connect();
@@ -153,6 +147,18 @@ public class CopyActivity extends BaseNfcActivity {
                     result += temp;
                 }
 
+                /**
+                 * 得到发给服务器的uid
+                 */
+                for(int i = 0; i < 6; i++){
+                    char a = result.charAt(i);
+                    uid_server = uid_server + a;
+                }
+                for (int i = 8; i < 16; i++){
+                    char a = result.charAt(i);
+                    uid_server = uid_server + a;
+                }
+
                 temp = "";
                 int move = 0x80;
                 byte[] transceive = mifare.transceive(new byte[]{0x30, -128});
@@ -163,8 +169,117 @@ public class CopyActivity extends BaseNfcActivity {
                 }
 
             }catch (Exception e){
-                System.out.println("读状态位异常");
-
+                boolean isContains = Arrays.asList(Constant.UIDARRAY).contains(uid_server);
+                int postion = 0;
+                int uidCase = 0;
+                if (isContains) {
+                    for (int i = 0;i < Constant.UIDARRAY.length;i++) {
+                        if (Constant.UIDARRAY[i].equals(uid_server)) {
+                            postion = i + 1;
+                        }
+                    }
+                    uidCase = postion % 32;
+                    switch (uidCase) {
+                        case 0:
+                            temp = "00000";
+                            break;
+                        case 1:
+                            temp = "00001";
+                            break;
+                        case 2:
+                            temp = "00010";
+                            break;
+                        case 3:
+                            temp = "00011";
+                            break;
+                        case 4:
+                            temp = "00100";
+                            break;
+                        case 5:
+                            temp = "00101";
+                            break;
+                        case 6:
+                            temp = "00110";
+                            break;
+                        case 7:
+                            temp = "00111";
+                            break;
+                        case 8:
+                            temp = "01000";
+                            break;
+                        case 9:
+                            temp = "01001";
+                            break;
+                        case 10:
+                            temp = "01010";
+                            break;
+                        case 11:
+                            temp = "01011";
+                            break;
+                        case 12:
+                            temp = "01100";
+                            break;
+                        case 13:
+                            temp = "01101";
+                            break;
+                        case 14:
+                            temp = "01110";
+                            break;
+                        case 15:
+                            temp = "01111";
+                            break;
+                        case 16:
+                            temp = "10000";
+                            break;
+                        case 17:
+                            temp = "10001";
+                            break;
+                        case 18:
+                            temp = "10010";
+                            break;
+                        case 19:
+                            temp = "10011";
+                            break;
+                        case 20:
+                            temp = "10100";
+                            break;
+                        case 21:
+                            temp = "10101";
+                            break;
+                        case 22:
+                            temp = "10110";
+                            break;
+                        case 23:
+                            temp = "10111";
+                            break;
+                        case 24:
+                            temp = "11000";
+                            break;
+                        case 25:
+                            temp = "11001";
+                            break;
+                        case 26:
+                            temp = "11010";
+                            break;
+                        case 27:
+                            temp = "11011";
+                            break;
+                        case 28:
+                            temp = "11100";
+                            break;
+                        case 29:
+                            temp = "11101";
+                            break;
+                        case 30:
+                            temp = "11110";
+                            break;
+                        case 31:
+                            temp = "11111";
+                            break;
+                    }
+                } else {
+                    temp = "";
+                }
             }
             try {
                 mifare.close();

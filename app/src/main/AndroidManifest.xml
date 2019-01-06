@@ -36,6 +36,10 @@
             android:name=".activity.CopyActivity"
             android:launchMode="singleTop">
         </activity>
+        <activity
+            android:name=".activity.CompareActivity"
+            android:launchMode="singleTop">
+        </activity>
     </application>
 
 </manifest>
