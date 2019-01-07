@@ -14,15 +14,19 @@ import android.widget.Toast;
 
 import com.example.pengllrn.publishcertificate.R;
 import com.example.pengllrn.publishcertificate.base.BaseNfcActivity;
+import com.example.pengllrn.publishcertificate.bean.Tagg;
 import com.example.pengllrn.publishcertificate.constant.Constant;
+import com.example.pengllrn.publishcertificate.gson.ParseJson;
 import com.example.pengllrn.publishcertificate.internet.OkHttp;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
+import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
@@ -37,15 +41,46 @@ public class WriteTextActivity extends BaseNfcActivity {
     private String mtype;   //保存随机产生的四位随机数
     private String num_zouyun = "";  //保存发送给服务器的证书
     private String uid_zouyun = ""; //保存发送给服务器的uid；
-    private String applyUrl = Constant.SERVER_URL;
+    private String groupNum = "";//保存双证组号
+    private String applyUrl = Constant.URL_ADD_TAG;
+    private ParseJson mParseJson = new ParseJson();
 
     Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             // TODO Auto-generated method stub
             switch (msg.what) {
-                case 0x2020:
-
+                case 0x2017:
+                    String reponsedata = (msg.obj).toString();
+                    int status = mParseJson.Json2TaggServer(reponsedata).getStatus();
+                    String message = mParseJson.Json2TaggServer(reponsedata).getMsg();
+                    String uid = mParseJson.Json2TaggServer(reponsedata).getTagg().getUid();
+                    String certificate = mParseJson.Json2TaggServer(reponsedata).getTagg().getCertificate();
+                    String obflag = mParseJson.Json2TaggServer(reponsedata).getTagg().getObflag();
+                    String brand = mParseJson.Json2TaggServer(reponsedata).getTagg().getBrand();
+                    String group_number = mParseJson.Json2TaggServer(reponsedata).getTagg().getGroup_number();
+                    if (status == 0) {
+                        Toast.makeText(WriteTextActivity.this, message, Toast.LENGTH_SHORT).show();
+                        System.out.print("brand is ："
+                                + brand
+                                + "   "
+                                + "Group Number is ："
+                                + group_number
+                                + "    "
+                                + "certificate is："
+                                + certificate
+                                + " "
+                                + "uid is ："
+                                + uid + "    "
+                                + "  "
+                                + "obflag is ："
+                                + obflag
+                                +"\n");
+                    }
+                    break;
+                case 0x22:
+                    Toast.makeText(WriteTextActivity.this,"网络请求延迟，发证失败",Toast.LENGTH_SHORT).show();
+                    break;
             }
             super.handleMessage(msg);
         }
@@ -55,6 +90,7 @@ public class WriteTextActivity extends BaseNfcActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_write_text);
+        getGroupNum();
     }
     @Override
     public void onNewIntent(Intent intent) {
@@ -97,17 +133,68 @@ public class WriteTextActivity extends BaseNfcActivity {
         System.out.println("发给服务器的uid为：" + uid_zouyun);
         System.out.println("品牌为：" + mlogo + "   " + "发证类型为：" + mtype + "    " + "证书为：" + num_zouyun
                 + " " + "uid为：" + uid_zouyun + "    " + "  " + "状态位为：" + temp);
-//        num_zouyun = "";
-//        uid_zouyun = "";
+
         if((mlogo != "") && (mtype != "") && (num_zouyun.length() == 8) && (uid_zouyun.length() == 14))
         {
-//            sendRequestWithOkHttp();
             OkHttp okHttp = new OkHttp(getApplicationContext(),mHandler);
-            okHttp.getFromInternet(applyUrl);
-            Toast.makeText(WriteTextActivity.this, "发证成功", Toast.LENGTH_SHORT).show();
+            /**
+             * 双证网络数据发送
+             */
+            if (mtype.equals("双证")) {
+                System.out.println("Dou-certi group number is " + groupNum);
+                /**
+                 * 双证有状态位网络数据发送
+                 */
+                if (temp != "") {
+                    RequestBody requestBody = new FormBody.Builder()
+                            .add("uid",uid_zouyun)
+                            .add("certificate",num_zouyun)
+                            .add("obflag",temp)
+                            .add("brand",mlogo)
+                            .add("group_number",groupNum)
+                            .build();
+                    okHttp.postFromInternet(applyUrl,requestBody);
+                    /**
+                     * 双证无状态位网络数据发送
+                     */
+                } else {
+                    RequestBody requestBody = new FormBody.Builder()
+                            .add("uid",uid_zouyun)
+                            .add("certificate",num_zouyun)
+                            .add("brand",mlogo)
+                            .add("group_number",groupNum)
+                            .build();
+                    okHttp.postFromInternet(applyUrl,requestBody);
+                }
+                /**
+                 * 单证网络数据发送
+                 */
+            } else {
+                /**
+                 * 单证有状态位网络数据发送
+                 */
+                if (temp != "") {
+                    RequestBody requestBody = new FormBody.Builder()
+                            .add("uid",uid_zouyun)
+                            .add("certificate",num_zouyun)
+                            .add("obflag",temp)
+                            .add("brand",mlogo)
+                            .build();
+                    okHttp.postFromInternet(applyUrl,requestBody);
+                    /**
+                     * 单证无状态位网络数据发送
+                     */
+                } else {
+                    RequestBody requestBody = new FormBody.Builder()
+                            .add("uid",uid_zouyun)
+                            .add("certificate",num_zouyun)
+                            .add("brand",mlogo)
+                            .build();
+                    okHttp.postFromInternet(applyUrl,requestBody);
+                }
+            }
         }else{
-            System.out.println("发证失败");
-            Toast.makeText(WriteTextActivity.this, "发证失败", Toast.LENGTH_SHORT).show();
+            Toast.makeText(WriteTextActivity.this, "请选择品牌或者单双证类型", Toast.LENGTH_SHORT).show();
         }
 
         num_zouyun = "";
@@ -286,7 +373,6 @@ public class WriteTextActivity extends BaseNfcActivity {
                 } else {
                     temp = "";
                 }
-
             }
             try {
                 mifare.close();
@@ -316,22 +402,24 @@ public class WriteTextActivity extends BaseNfcActivity {
         System.out.println("随机产生的证书为：" + mText);
     }
 
-    /** 向服务器发送请求测试*/
-//    public void sendRequestWithOkHttp(){
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                try{
-//                    OkHttpClient client = new OkHttpClient();
-//                    Request request = new Request.Builder()
-//                            .url("http://47.107.37.50:8000/get_school_property/?schoolid=7")
-//                            .build();
-//                    Response response = client.newCall(request).execute();
-//                    System.out.println("发送网络请求是否成功：" + response.isSuccessful());
-//                }catch(Exception e){
-//
-//                }
-//            }
-//        }).start();
-//    }
+    public void getGroupNum() {
+        int a0, a1, a2, a3, a4, a5, a6, a7;
+        a0 = (int) (Math.random() * 10);
+        a1 = (int) (Math.random() * 10);
+        a2 = (int) (Math.random() * 10);
+        a3 = (int) (Math.random() * 10);
+        a4 = (int) (Math.random() * 10);
+        a5 = (int) (Math.random() * 10);
+        a6 = (int) (Math.random() * 10);
+        a7 = (int) (Math.random() * 10);
+
+        groupNum = Integer.toString(a0) + Integer.toString(a1) + Integer.toString(a2) +
+                Integer.toString(a3) + Integer.toString(a4) + Integer.toString(a5) +
+                Integer.toString(a6) + Integer.toString(a7);
+
+        SharedPreferences sharedPreferences = getSharedPreferences("groupnumber", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("group_number",groupNum);
+        editor.apply();
+    }
 }

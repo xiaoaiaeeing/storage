@@ -9,7 +9,10 @@ public class Constant {
     /**
      * 系统所使用到的URL
      */
-    public static final String SERVER_URL = "http://47.107.37.50:8000/";//服务器所在站点以及端口号
+    public static final String SERVER_URL = "http://47.96.123.242/";//服务器所在站点以及端口号
+
+    public static final String URL_ADD_TAG = SERVER_URL + "function/add_tag";
+
 
     public static final String[] UIDARRAY = {"047be0170a685f80","0482e0ee0a685f80","048ae0e60a685f80",
             "0493e0ff0a685f80",

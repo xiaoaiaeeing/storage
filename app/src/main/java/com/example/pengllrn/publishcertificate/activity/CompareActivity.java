@@ -14,7 +14,6 @@ import android.widget.Toast;
 import com.example.pengllrn.publishcertificate.R;
 import com.example.pengllrn.publishcertificate.base.BaseNfcActivity;
 
-import java.nio.charset.Charset;
 
 /**
  * Created by pengllrn on 2019/1/6.
@@ -79,13 +78,18 @@ public class CompareActivity extends BaseNfcActivity {
             flag = !flag;
         }
 
-        if (certificate1.equals(certificate2)) {
-            compareResult.setText("比对结果为：证书一致，请按Clear键清除数据");
-        } else if ((certificate1.equals("") || (certificate2.equals("")))){
-            compareResult.setText("比对结果为：请扫描第二张标签");
-        } else {
-            compareResult.setText("比对结果为：证书不一致，请按Clear键清除数据");
+        try {
+            if (certificate1.equals(certificate2)) {
+                compareResult.setText("比对结果为：证书一致，请按Clear键清除数据");
+            } else if ((certificate1.equals("") || (certificate2.equals("")))){
+                compareResult.setText("请扫描第二张标签");
+            } else {
+                compareResult.setText("比对结果为：证书不一致，请按Clear键清除数据");
+            }
+        } catch (Exception e) {
+            compareResult.setText("证书写入未成功，请重新扫描");
         }
+
     }
 
     private void initView() {

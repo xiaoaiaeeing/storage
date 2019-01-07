@@ -13,11 +13,15 @@ import android.widget.Toast;
 import com.example.pengllrn.publishcertificate.R;
 import com.example.pengllrn.publishcertificate.base.BaseNfcActivity;
 import com.example.pengllrn.publishcertificate.constant.Constant;
+import com.example.pengllrn.publishcertificate.gson.ParseJson;
 import com.example.pengllrn.publishcertificate.internet.OkHttp;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+
+import okhttp3.FormBody;
+import okhttp3.RequestBody;
 
 /**
  * Created by pengllrn on 2019/1/4.
@@ -26,20 +30,51 @@ import java.util.Arrays;
 public class CopyActivity extends BaseNfcActivity {
 
     private String cText = "";//复制的证书
+    private String cGroupNum = "";//复制的组号
     private String mlogo;
     private String mtype;
     private String temp = "";//状态位
     private String certi_server = "";//发给服务器的证书
     private String uid_server = "";//发给服务器的uid
-    private String applyUrl = Constant.SERVER_URL;
+    private String applyUrl = Constant.URL_ADD_TAG;
+    private ParseJson mParseJson = new ParseJson();
 
     Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             // TODO Auto-generated method stub
             switch (msg.what) {
-                case 0x2020:
-
+                case 0x2017:
+                    String reponsedata = (msg.obj).toString();
+                    int status = mParseJson.Json2TaggServer(reponsedata).getStatus();
+                    String message = mParseJson.Json2TaggServer(reponsedata).getMsg();
+                    String uid = mParseJson.Json2TaggServer(reponsedata).getTagg().getUid();
+                    String certificate = mParseJson.Json2TaggServer(reponsedata).getTagg().getCertificate();
+                    String obflag = mParseJson.Json2TaggServer(reponsedata).getTagg().getObflag();
+                    String brand = mParseJson.Json2TaggServer(reponsedata).getTagg().getBrand();
+                    String group_number = mParseJson.Json2TaggServer(reponsedata).getTagg().getGroup_number();
+                    if (status == 0) {
+                        Toast.makeText(CopyActivity.this, message, Toast.LENGTH_SHORT).show();
+                        System.out.print("brand is ："
+                                + brand
+                                + "   "
+                                + "Group Number is ："
+                                + group_number
+                                + "    "
+                                + "certificate is："
+                                + certificate
+                                + " "
+                                + "uid is ："
+                                + uid + "    "
+                                + "  "
+                                + "obflag is ："
+                                + obflag
+                                +"\n");
+                    }
+                    break;
+                case 0x22:
+                    Toast.makeText(CopyActivity.this,"网络请求延迟，发证失败",Toast.LENGTH_SHORT).show();
+                    break;
             }
             super.handleMessage(msg);
         }
@@ -49,6 +84,8 @@ public class CopyActivity extends BaseNfcActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_copy);
+        SharedPreferences pref = getSharedPreferences("groupnumber",MODE_PRIVATE);
+        cGroupNum = pref.getString("group_number","");
     }
 
     @Override
@@ -94,11 +131,66 @@ public class CopyActivity extends BaseNfcActivity {
         System.out.println("品牌为：" + mlogo + "   " + "发证类型为：" + mtype + "    " + "证书为：" + certi_server
                 + " " + "uid为：" + uid_server + "    " + "状态位为：" + temp);
 
-        if ((mlogo != "") && (mtype != "") && (certi_server.length() == 8) && (uid_server.length() == 14)) {//根据服务器，判断条件需修改
+        if((mlogo != "") && (mtype != "") && (certi_server.length() == 8) && (uid_server.length() == 14))
+        {
             OkHttp okHttp = new OkHttp(getApplicationContext(),mHandler);
-            okHttp.getFromInternet(applyUrl);
-            Toast.makeText(CopyActivity.this, "发证成功", Toast.LENGTH_SHORT).show();
-        } else {
+            /**
+             * 双证网络数据发送
+             */
+            if (mtype.equals("双证")) {
+                System.out.println("Dou-certi group number is " + cGroupNum);
+                /**
+                 * 双证有状态位网络数据发送
+                 */
+                if (temp != "") {
+                    RequestBody requestBody = new FormBody.Builder()
+                            .add("uid",uid_server)
+                            .add("certificate",certi_server)
+                            .add("obflag",temp)
+                            .add("brand",mlogo)
+                            .add("group_number",cGroupNum)
+                            .build();
+                    okHttp.postFromInternet(applyUrl,requestBody);
+                    /**
+                     * 双证无状态位网络数据发送
+                     */
+                } else {
+                    RequestBody requestBody = new FormBody.Builder()
+                            .add("uid",uid_server)
+                            .add("certificate",certi_server)
+                            .add("brand",mlogo)
+                            .add("group_number",cGroupNum)
+                            .build();
+                    okHttp.postFromInternet(applyUrl,requestBody);
+                }
+                /**
+                 * 单证网络数据发送
+                 */
+            } else {
+                /**
+                 * 单证有状态位网络数据发送
+                 */
+                if (temp != "") {
+                    RequestBody requestBody = new FormBody.Builder()
+                            .add("uid",uid_server)
+                            .add("certificate",certi_server)
+                            .add("obflag",temp)
+                            .add("brand",mlogo)
+                            .build();
+                    okHttp.postFromInternet(applyUrl,requestBody);
+                    /**
+                     * 单证无状态位网络数据发送
+                     */
+                } else {
+                    RequestBody requestBody = new FormBody.Builder()
+                            .add("uid",uid_server)
+                            .add("certificate",certi_server)
+                            .add("brand",mlogo)
+                            .build();
+                    okHttp.postFromInternet(applyUrl,requestBody);
+                }
+            }
+        }else{
             Toast.makeText(CopyActivity.this, "请选择品牌或者单双证类型", Toast.LENGTH_SHORT).show();
         }
 

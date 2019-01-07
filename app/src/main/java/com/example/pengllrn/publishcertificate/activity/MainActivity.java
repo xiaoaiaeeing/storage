@@ -16,11 +16,12 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.example.pengllrn.publishcertificate.R;
+import com.example.pengllrn.publishcertificate.base.BaseNfcActivity;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends BaseNfcActivity implements View.OnClickListener {
     /**
      * TextView选择框
      */
