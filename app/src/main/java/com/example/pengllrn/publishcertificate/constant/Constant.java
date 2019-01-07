@@ -14,7 +14,7 @@ public class Constant {
     public static final String URL_ADD_TAG = SERVER_URL + "function/add_tag";
 
 
-    public static final String[] UIDARRAY = {"047be0170a685f80","0482e0ee0a685f80","048ae0e60a685f80",
+    public static final String[] UIDARRAY = {"040ce50a685f81","0406e40a685f81","047be0170a685f80","0482e0ee0a685f80","048ae0e60a685f80",
             "0493e0ff0a685f80",
             "049ce0f00a685f80","04a3e0cf0a685f80","04aae0c60a685f80","04b2e0de0a685f80",
             "04b9e0d50a685f80","04c0e0ac0a685f80","04c8e0a40a685f80","04d1e0bd0a685f80",
