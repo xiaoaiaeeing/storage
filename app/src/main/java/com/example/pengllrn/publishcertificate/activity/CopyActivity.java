@@ -38,6 +38,7 @@ public class CopyActivity extends BaseNfcActivity {
     private String uid_server = "";//发给服务器的uid
     private String applyUrl = Constant.URL_ADD_TAG;
     private ParseJson mParseJson = new ParseJson();
+    private boolean isSuccessfullyWritted = false;
 
     Handler mHandler = new Handler() {
         @Override
@@ -135,7 +136,7 @@ public class CopyActivity extends BaseNfcActivity {
         System.out.println("品牌为：" + mlogo + "   " + "发证类型为：" + mtype + "    " + "证书为：" + certi_server
                 + " " + "uid为：" + uid_server + "    " + "状态位为：" + temp);
 
-        if((mlogo != "") && (mtype != "") && (certi_server.length() == 8) && (uid_server.length() == 14))
+        if((mlogo != "") && (mtype != "") && (certi_server.length() == 8) && (uid_server.length() == 14) && isSuccessfullyWritted)
         {
             OkHttp okHttp = new OkHttp(getApplicationContext(),mHandler);
             /**
@@ -214,8 +215,11 @@ public class CopyActivity extends BaseNfcActivity {
             ultralight.writePage(22, num.getBytes(Charset.forName("US-ASCII")));
 
             System.out.println("非ndef数据写入成功");
+            isSuccessfullyWritted = true;
         } catch (Exception e) {
             System.out.println("非ndef写入异常");
+            Toast.makeText(CopyActivity.this,"NFC标签数据未读取成功，请将标签靠近手机NFC检测区域再次读取",Toast.LENGTH_SHORT).show();
+            isSuccessfullyWritted = false;
         } finally {
             try {
                 ultralight.close();

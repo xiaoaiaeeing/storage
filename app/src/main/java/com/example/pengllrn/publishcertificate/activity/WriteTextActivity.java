@@ -14,7 +14,6 @@ import android.widget.Toast;
 
 import com.example.pengllrn.publishcertificate.R;
 import com.example.pengllrn.publishcertificate.base.BaseNfcActivity;
-import com.example.pengllrn.publishcertificate.bean.Tagg;
 import com.example.pengllrn.publishcertificate.constant.Constant;
 import com.example.pengllrn.publishcertificate.gson.ParseJson;
 import com.example.pengllrn.publishcertificate.internet.OkHttp;
@@ -24,10 +23,8 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 
 import okhttp3.FormBody;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import okhttp3.RequestBody;
-import okhttp3.Response;
+
 
 /**
  * Created by pengllrn on 2019/1/4.
@@ -44,6 +41,7 @@ public class WriteTextActivity extends BaseNfcActivity {
     private String groupNum = "";//保存双证组号
     private String applyUrl = Constant.URL_ADD_TAG;
     private ParseJson mParseJson = new ParseJson();
+    private boolean isSuccessfullyWritted = false;
 
     Handler mHandler = new Handler() {
         @Override
@@ -138,7 +136,7 @@ public class WriteTextActivity extends BaseNfcActivity {
         System.out.println("品牌为：" + mlogo + "   " + "发证类型为：" + mtype + "    " + "证书为：" + num_zouyun
                 + " " + "uid为：" + uid_zouyun + "    " + "  " + "状态位为：" + temp);
 
-        if((mlogo != "") && (mtype != "") && (num_zouyun.length() == 8) && (uid_zouyun.length() == 14))
+        if((mlogo != "") && (mtype != "") && (num_zouyun.length() == 8) && (uid_zouyun.length() == 14) && isSuccessfullyWritted)
         {
             OkHttp okHttp = new OkHttp(getApplicationContext(),mHandler);
             /**
@@ -215,8 +213,10 @@ public class WriteTextActivity extends BaseNfcActivity {
             ultralight.writePage(22, num.getBytes(Charset.forName("US-ASCII")));
 
             System.out.println("非ndef数据写入成功");
+            isSuccessfullyWritted = true;
         } catch (Exception e) {
             System.out.println("非ndef写入异常");
+            isSuccessfullyWritted = false;
         } finally {
             try {
                 ultralight.close();
