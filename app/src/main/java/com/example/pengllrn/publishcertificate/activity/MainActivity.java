@@ -158,10 +158,19 @@ public class MainActivity extends BaseNfcActivity implements View.OnClickListene
     private void initSelectPopup() {
         mTypeLv = new ListView(this);
         testData1 = new ArrayList<String>();
-        testData1.add("五粮液");
+        testData1.add("五粮春");
         testData1.add("剑南春");
-        testData1.add("西凤酒");
-        testData1.add("茅台");
+        testData1.add("洋河酒");
+        testData1.add("茅台酒");
+        testData1.add("泸州老窖");
+        testData1.add("古井贡酒");
+        testData1.add("杜康酒");
+        testData1.add("郎酒");
+        testData1.add("玉溪烟");
+        testData1.add("黄鹤楼烟");
+        testData1.add("黄山徽商烟");
+        testData1.add("九寨沟烟");
+        testData1.add("阿玛尼服饰");
         // 设置适配器
         testDataAdapter = new ArrayAdapter<String>(this, R.layout.popup_text_item, testData1);
         mTypeLv.setAdapter(testDataAdapter);

@@ -51,31 +51,35 @@ public class WriteTextActivity extends BaseNfcActivity {
             // TODO Auto-generated method stub
             switch (msg.what) {
                 case 0x2017:
-                    String reponsedata = (msg.obj).toString();
-                    int status = mParseJson.Json2TaggServer(reponsedata).getStatus();
-                    String message = mParseJson.Json2TaggServer(reponsedata).getMsg();
-                    String uid = mParseJson.Json2TaggServer(reponsedata).getTagg().getUid();
-                    String certificate = mParseJson.Json2TaggServer(reponsedata).getTagg().getCertificate();
-                    String obflag = mParseJson.Json2TaggServer(reponsedata).getTagg().getObflag();
-                    String brand = mParseJson.Json2TaggServer(reponsedata).getTagg().getBrand();
-                    String group_number = mParseJson.Json2TaggServer(reponsedata).getTagg().getGroup_number();
-                    if (status == 0) {
-                        Toast.makeText(WriteTextActivity.this, message, Toast.LENGTH_SHORT).show();
-                        System.out.print("brand is ："
-                                + brand
-                                + "   "
-                                + "Group Number is ："
-                                + group_number
-                                + "    "
-                                + "certificate is："
-                                + certificate
-                                + " "
-                                + "uid is ："
-                                + uid + "    "
-                                + "  "
-                                + "obflag is ："
-                                + obflag
-                                +"\n");
+                    try {
+                        String reponsedata = (msg.obj).toString();
+                        int status = mParseJson.Json2TaggServer(reponsedata).getStatus();
+                        String message = mParseJson.Json2TaggServer(reponsedata).getMsg();
+                        String uid = mParseJson.Json2TaggServer(reponsedata).getTagg().getUid();
+                        String certificate = mParseJson.Json2TaggServer(reponsedata).getTagg().getCertificate();
+                        String obflag = mParseJson.Json2TaggServer(reponsedata).getTagg().getObflag();
+                        String brand = mParseJson.Json2TaggServer(reponsedata).getTagg().getBrand();
+                        String group_number = mParseJson.Json2TaggServer(reponsedata).getTagg().getGroup_number();
+                        if (status == 0) {
+                            Toast.makeText(WriteTextActivity.this, message, Toast.LENGTH_SHORT).show();
+                            System.out.println("brand is ："
+                                    + brand
+                                    + "   "
+                                    + "Group Number is ："
+                                    + group_number
+                                    + "    "
+                                    + "certificate is："
+                                    + certificate
+                                    + " "
+                                    + "uid is ："
+                                    + uid + "    "
+                                    + "  "
+                                    + "obflag is ："
+                                    + obflag
+                                    +"\n");
+                        }
+                    } catch (Exception e) {
+                        Toast.makeText(WriteTextActivity.this,"NFC标签数据未读取成功，请将标签靠近手机NFC检测区域再次读取",Toast.LENGTH_SHORT).show();
                     }
                     break;
                 case 0x22:
