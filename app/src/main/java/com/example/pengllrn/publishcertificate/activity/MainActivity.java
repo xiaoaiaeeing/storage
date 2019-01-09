@@ -27,30 +27,35 @@ public class MainActivity extends BaseNfcActivity implements View.OnClickListene
      */
     private TextView mSelectTv;//品牌
     private TextView mtextview;//单双证
+    private TextView mPublishNum;//发证数量
 
     /**
      * popup窗口里的ListView
      */
     private ListView mTypeLv;//品牌
     private ListView mNumLV;//单双证
+    private ListView mPublishNumLv;
 
     /**
      * popup窗口
      */
     private PopupWindow typeSelectPopup;
     private PopupWindow myPopup;
+    private PopupWindow mPublishNumPopup;
 
     /**
      * 模拟的品牌数据和单双证数据
      */
     private List<String> testData1;
     private List<String> testData2;
+    private List<Integer> testData3;
 
     /**
      * 数据适配器
      */
     private ArrayAdapter<String> testDataAdapter;
     private ArrayAdapter<String> testDataAdapter1;
+    private ArrayAdapter<Integer> testDataAdapter2;
 
     /**
      * ImageView
@@ -58,6 +63,7 @@ public class MainActivity extends BaseNfcActivity implements View.OnClickListene
     private ImageView imageView1;   //发证
     private ImageView imageView2;   //复制
     private ImageView imageView3;   //复制比对
+    private ImageView imageView4;   //初始化
 
     /**
      * 保存随机数
@@ -71,6 +77,7 @@ public class MainActivity extends BaseNfcActivity implements View.OnClickListene
      */
     private String logo;//品牌
     private String mtype;//单双证
+    private int publishNum = 0;//发证次数
 
 
     @Override
@@ -89,9 +96,11 @@ public class MainActivity extends BaseNfcActivity implements View.OnClickListene
     private void initUI() {
         mSelectTv = (TextView) findViewById(R.id.tv_select_input);
         mtextview = (TextView) findViewById(R.id.tv_select_num);
+        mPublishNum = (TextView) findViewById(R.id.tv_publish_num);
         imageView1 = (ImageView) findViewById(R.id.my_fa);
         imageView2 = (ImageView) findViewById(R.id.my_copy);
-        imageView3 = (ImageView) findViewById(R.id.my_comapre);
+        imageView3 = (ImageView) findViewById(R.id.my_compare);
+        imageView4 = (ImageView) findViewById(R.id.my_initialization);
     }
 
     /**
@@ -100,10 +109,11 @@ public class MainActivity extends BaseNfcActivity implements View.OnClickListene
     private void initListener() {
         mSelectTv.setOnClickListener(this);
         mtextview.setOnClickListener(this);
+        mPublishNum.setOnClickListener(this);
         imageView1.setOnClickListener(this);
         imageView2.setOnClickListener(this);
         imageView3.setOnClickListener(this);
-
+        imageView4.setOnClickListener(this);
     }
 
     @Override
@@ -125,28 +135,40 @@ public class MainActivity extends BaseNfcActivity implements View.OnClickListene
                     myPopup.showAsDropDown(mtextview, 0, 10);
                 }
                 break;
+            case R.id.tv_publish_num:
+                //点击控件后显示popup窗口
+                iniSelectPopup2();
+                // 使用isShowing()检查popup窗口是否在显示状态
+                if (mPublishNumPopup != null && !mPublishNumPopup.isShowing()) {
+                    mPublishNumPopup.showAsDropDown(mPublishNum, 0, 10);
+                }
+                break;
             case R.id.my_fa:
                 SharedPreferences sharedPreferences = getSharedPreferences("info", MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putString("Name", logo);
                 editor.putString("Type", mtype);
+                editor.putInt("publishNum",publishNum);
                 editor.apply();
                 intent = new Intent(MainActivity.this, WriteTextActivity.class);
                 startActivity(intent);
                 break;
             case R.id.my_copy:
-                SharedPreferences sharedpreferences = getSharedPreferences("Info", MODE_PRIVATE);
-                SharedPreferences.Editor editor0 = sharedpreferences.edit();
-                editor0.putString("Name", logo);
-                editor0.putString("Type", mtype);
-                editor0.apply();
+//                SharedPreferences sharedpreferences = getSharedPreferences("Info", MODE_PRIVATE);
+//                SharedPreferences.Editor editor0 = sharedpreferences.edit();
+//                editor0.putString("Name", logo);
+//                editor0.putString("Type", mtype);
+//                editor0.apply();
                 intent = new Intent(MainActivity.this, CopyActivity.class);
                 startActivity(intent);
                 break;
-            case R.id.my_comapre:
+            case R.id.my_compare:
                 intent = new Intent(MainActivity.this,CompareActivity.class);
                 startActivity(intent);
                 break;
+            case R.id.my_initialization:
+                intent = new Intent(MainActivity.this,InitializationActivity.class);
+                startActivity(intent);
             default:
                 break;
         }
@@ -239,6 +261,48 @@ public class MainActivity extends BaseNfcActivity implements View.OnClickListene
             public void onDismiss() {
                 //关闭popup窗口
                 myPopup.dismiss();
+            }
+        });
+    }
+
+    /**
+     * 初始化popwindow3
+     */
+    private void iniSelectPopup2() {
+        mPublishNumLv = new ListView(this);
+        testData3 = new ArrayList<Integer>();
+        testData3.add(1);
+        testData3.add(2);
+        testData3.add(3);
+        testData3.add(4);
+        testData3.add(5);
+        //设置适配器
+        testDataAdapter2 = new ArrayAdapter<Integer>(this, R.layout.popup_text_item, testData3);
+        mPublishNumLv.setAdapter(testDataAdapter2);
+
+        //设置ListView点击事件
+        mPublishNumLv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                // 在这里获取item数据
+                int value = testData3.get(position);
+                // 把选择的数据展示对应的TextView上
+                mPublishNum.setText(value + "");
+                publishNum = value;
+                // 选择完后关闭popup窗口
+                mPublishNumPopup.dismiss();
+            }
+        });
+        mPublishNumPopup = new PopupWindow(mPublishNumLv, mPublishNum.getWidth(), ActionBar.LayoutParams.WRAP_CONTENT, true);
+        Drawable drawable = ContextCompat.getDrawable(this, R.drawable.bg_corner);
+        mPublishNumPopup.setBackgroundDrawable(drawable);
+        mPublishNumPopup.setFocusable(true);
+        mPublishNumPopup.setOutsideTouchable(true);
+        mPublishNumPopup.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                //关闭popup窗口
+                mPublishNumPopup.dismiss();
             }
         });
     }

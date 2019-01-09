@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Publish Certificate</string>
+    <string name="title_activity_initialization">InitializationActivity</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

@@ -42,6 +42,8 @@ public class WriteTextActivity extends BaseNfcActivity {
     private String applyUrl = Constant.URL_ADD_TAG;
     private ParseJson mParseJson = new ParseJson();
     private boolean isSuccessfullyWritted = false;
+    private int publishNum = 0;//发证的次数
+    private int maxPublishNum = 0;//最大发证次数
 
     Handler mHandler = new Handler() {
         @Override
@@ -50,6 +52,7 @@ public class WriteTextActivity extends BaseNfcActivity {
             switch (msg.what) {
                 case 0x2017:
                     try {
+                        publishNum += 1;
                         String reponsedata = (msg.obj).toString();
                         int status = mParseJson.Json2TaggServer(reponsedata).getStatus();
                         String message = mParseJson.Json2TaggServer(reponsedata).getMsg();
@@ -92,10 +95,16 @@ public class WriteTextActivity extends BaseNfcActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_write_text);
+        SharedPreferences preferences = getSharedPreferences("info",MODE_PRIVATE);
+        maxPublishNum = preferences.getInt("publishNum",0);
         getGroupNum();
     }
     @Override
     public void onNewIntent(Intent intent) {
+        if (publishNum > maxPublishNum) {
+            Toast.makeText(WriteTextActivity.this,"超过最大发证次数限制",Toast.LENGTH_SHORT).show();
+            return;
+        }
         getNum();
         if (mText == null)
             return;
@@ -136,7 +145,7 @@ public class WriteTextActivity extends BaseNfcActivity {
         System.out.println("品牌为：" + mlogo + "   " + "发证类型为：" + mtype + "    " + "证书为：" + num_zouyun
                 + " " + "uid为：" + uid_zouyun + "    " + "  " + "状态位为：" + temp);
 
-        if((mlogo != "") && (mtype != "") && (num_zouyun.length() == 8) && (uid_zouyun.length() == 14) && isSuccessfullyWritted)
+        if((mlogo != "") && (mtype != "") && (maxPublishNum != 0) && (num_zouyun.length() == 8) && (uid_zouyun.length() == 14) && isSuccessfullyWritted)
         {
             OkHttp okHttp = new OkHttp(getApplicationContext(),mHandler);
             /**
@@ -172,6 +181,7 @@ public class WriteTextActivity extends BaseNfcActivity {
                  * 单证网络数据发送
                  */
             } else {
+                groupNum = "-1";
                 /**
                  * 单证有状态位网络数据发送
                  */
@@ -181,6 +191,7 @@ public class WriteTextActivity extends BaseNfcActivity {
                             .add("certificate",num_zouyun)
                             .add("obflag",temp)
                             .add("brand",mlogo)
+                            .add("group_number",groupNum)
                             .build();
                     okHttp.postFromInternet(applyUrl,requestBody);
                     /**
@@ -191,12 +202,13 @@ public class WriteTextActivity extends BaseNfcActivity {
                             .add("uid",uid_zouyun)
                             .add("certificate",num_zouyun)
                             .add("brand",mlogo)
+                            .add("group_number",groupNum)
                             .build();
                     okHttp.postFromInternet(applyUrl,requestBody);
                 }
             }
         }else{
-            Toast.makeText(WriteTextActivity.this, "请选择品牌或者单双证类型", Toast.LENGTH_SHORT).show();
+            Toast.makeText(WriteTextActivity.this, "请选择品牌,单双证类型或者发证次数", Toast.LENGTH_SHORT).show();
         }
 
         num_zouyun = "";
@@ -216,6 +228,7 @@ public class WriteTextActivity extends BaseNfcActivity {
             isSuccessfullyWritted = true;
         } catch (Exception e) {
             System.out.println("非ndef写入异常");
+            Toast.makeText(WriteTextActivity.this,"NFC标签数据未读取成功，请将标签靠近手机NFC检测区域再次读取",Toast.LENGTH_SHORT).show();
             isSuccessfullyWritted = false;
         } finally {
             try {
@@ -421,9 +434,9 @@ public class WriteTextActivity extends BaseNfcActivity {
                 Integer.toString(a3) + Integer.toString(a4) + Integer.toString(a5) +
                 Integer.toString(a6) + Integer.toString(a7);
 
-        SharedPreferences sharedPreferences = getSharedPreferences("groupnumber", MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("group_number",groupNum);
-        editor.apply();
+//        SharedPreferences sharedPreferences = getSharedPreferences("groupnumber", MODE_PRIVATE);
+//        SharedPreferences.Editor editor = sharedPreferences.edit();
+//        editor.putString("group_number",groupNum);
+//        editor.apply();
     }
 }

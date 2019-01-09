@@ -16,6 +16,10 @@ public class Constant {
      */
     public static final String URL_ADD_TAG = SERVER_URL + "function/add_tag";
     /**
+     * 发证次数限制
+     */
+    public static final int MAX_PUBLISH_NUM = 2;
+    /**
      * 存在状态位的软标签uid
      */
     public static final String[] UIDARRAY = {"040ce50a685f81","0406e40a685f81","047be00a685f80","0482e00a685f80","048ae00a685f80",

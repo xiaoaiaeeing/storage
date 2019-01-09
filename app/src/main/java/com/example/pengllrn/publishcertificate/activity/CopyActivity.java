@@ -8,6 +8,12 @@ import android.nfc.tech.MifareUltralight;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.ContactsContract;
+import android.provider.Settings;
+import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.pengllrn.publishcertificate.R;
@@ -39,70 +45,84 @@ public class CopyActivity extends BaseNfcActivity {
     private String applyUrl = Constant.URL_ADD_TAG;
     private ParseJson mParseJson = new ParseJson();
     private boolean isSuccessfullyWritted = false;
+    private boolean isSuccessfullyRead = false;
 
-    Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            // TODO Auto-generated method stub
-            switch (msg.what) {
-                case 0x2017:
-                    try {
-                        String reponsedata = (msg.obj).toString();
-                        int status = mParseJson.Json2TaggServer(reponsedata).getStatus();
-                        String message = mParseJson.Json2TaggServer(reponsedata).getMsg();
-                        String uid = mParseJson.Json2TaggServer(reponsedata).getTagg().getUid();
-                        String certificate = mParseJson.Json2TaggServer(reponsedata).getTagg().getCertificate();
-                        String obflag = mParseJson.Json2TaggServer(reponsedata).getTagg().getObflag();
-                        String brand = mParseJson.Json2TaggServer(reponsedata).getTagg().getBrand();
-                        String group_number = mParseJson.Json2TaggServer(reponsedata).getTagg().getGroup_number();
-                        if (status == 0) {
-                            Toast.makeText(CopyActivity.this, message, Toast.LENGTH_SHORT).show();
-                            System.out.println("brand is ："
-                                    + brand
-                                    + "   "
-                                    + "Group Number is ："
-                                    + group_number
-                                    + "    "
-                                    + "certificate is："
-                                    + certificate
-                                    + " "
-                                    + "uid is ："
-                                    + uid + "    "
-                                    + "  "
-                                    + "obflag is ："
-                                    + obflag
-                                    +"\n");
-                        }
-                    } catch (Exception e) {
-                        Toast.makeText(CopyActivity.this,"NFC标签数据未读取成功，请将标签靠近手机NFC检测区域再次读取",Toast.LENGTH_SHORT).show();
-                    }
-                    break;
-                case 0x22:
-                    Toast.makeText(CopyActivity.this,"网络请求延迟，发证失败",Toast.LENGTH_SHORT).show();
-                    break;
-            }
-            super.handleMessage(msg);
-        }
-    };
+    private ImageView iv_copy_tag;
+    private ImageView iv_paste_tag;
+    private TextView tv_status;
+
+    private Tag detectedTag;
+
+//    Handler mHandler = new Handler() {
+//        @Override
+//        public void handleMessage(Message msg) {
+//            // TODO Auto-generated method stub
+//            switch (msg.what) {
+//                case 0x2017:
+//                    try {
+//                        String reponsedata = (msg.obj).toString();
+//                        int status = mParseJson.Json2TaggServer(reponsedata).getStatus();
+//                        String message = mParseJson.Json2TaggServer(reponsedata).getMsg();
+//                        String uid = mParseJson.Json2TaggServer(reponsedata).getTagg().getUid();
+//                        String certificate = mParseJson.Json2TaggServer(reponsedata).getTagg().getCertificate();
+//                        String obflag = mParseJson.Json2TaggServer(reponsedata).getTagg().getObflag();
+//                        String brand = mParseJson.Json2TaggServer(reponsedata).getTagg().getBrand();
+//                        String group_number = mParseJson.Json2TaggServer(reponsedata).getTagg().getGroup_number();
+//                        if (status == 0) {
+//                            Toast.makeText(CopyActivity.this, message, Toast.LENGTH_SHORT).show();
+//                            System.out.println("brand is ："
+//                                    + brand
+//                                    + "   "
+//                                    + "Group Number is ："
+//                                    + group_number
+//                                    + "    "
+//                                    + "certificate is："
+//                                    + certificate
+//                                    + " "
+//                                    + "uid is ："
+//                                    + uid + "    "
+//                                    + "  "
+//                                    + "obflag is ："
+//                                    + obflag
+//                                    +"\n");
+//                        }
+//                    } catch (Exception e) {
+//                        Toast.makeText(CopyActivity.this,"NFC标签数据未读取成功，请将标签靠近手机NFC检测区域再次读取",Toast.LENGTH_SHORT).show();
+//                    }
+//                    break;
+//                case 0x22:
+//                    Toast.makeText(CopyActivity.this,"网络请求延迟，发证失败",Toast.LENGTH_SHORT).show();
+//                    break;
+//            }
+//            super.handleMessage(msg);
+//        }
+//    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_copy);
-        SharedPreferences pref = getSharedPreferences("groupnumber",MODE_PRIVATE);
-        cGroupNum = pref.getString("group_number","");
+//        SharedPreferences pref = getSharedPreferences("groupnumber",MODE_PRIVATE);
+//        cGroupNum = pref.getString("group_number","");
+        iv_copy_tag = (ImageView) findViewById(R.id.iv_copy_tag);
+        iv_paste_tag = (ImageView) findViewById(R.id.iv_paste_tag);
+        tv_status = (TextView) findViewById(R.id.tv_status);
     }
 
     @Override
     public void onNewIntent(Intent intent) {
-        SharedPreferences pref = getSharedPreferences("certi", MODE_PRIVATE);
-        cText = pref.getString("certificate","");
-        System.out.println("The copied certification is : " + cText);
-        if (cText == null)
-            return;
+//        SharedPreferences pref = getSharedPreferences("certi", MODE_PRIVATE);
+//        cText = pref.getString("certificate","");
+//        System.out.println("The copied certification is : " + cText);
+
         //获取Tag对象
-        Tag detectedTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+        detectedTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
         analysisTag(detectedTag);
+        if (detectedTag != null) {
+            tv_status.setText("已检测到NFC标签，请在点击复制或粘贴按钮之前不要将手机远离NFC标签");
+        } else {
+            return;
+        }
         String[] techList = detectedTag.getTechList();
         boolean haveMifareUltralight = false;
         for (String tech : techList) {
@@ -117,87 +137,125 @@ public class CopyActivity extends BaseNfcActivity {
             return;
         }
 
-        writeTag(detectedTag, cText);
+        iv_copy_tag.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String decodeCerti = "";
+                if (detectedTag != null) {
+                    cText = readTag(detectedTag);
+                    System.out.println("复制的证书为：" + cText);
+                    try {
+                        for (int i = 1;i < 8;i += 2) {
+                            char a = cText.charAt(i);
+                            String ele_decodeCerti = Character.toString(a);
+                            decodeCerti += ele_decodeCerti;
+                        }
+                    } catch (Exception e) {
 
-        SharedPreferences pf = getSharedPreferences("Info", MODE_PRIVATE);
-        mlogo = pf.getString("Name", "");
-        mtype = pf.getString("Type", "");
-
-        /**
-         * 得到发给服务器的证书号
-         */
-        for(int i = 0; i < 4; i++){
-            char a = cText.charAt(i);
-            String mstr = "3" + a;
-            certi_server = certi_server + mstr;
-        }
-
-        System.out.println("发给服务器的uid为：" + uid_server);
-        System.out.println("品牌为：" + mlogo + "   " + "发证类型为：" + mtype + "    " + "证书为：" + certi_server
-                + " " + "uid为：" + uid_server + "    " + "状态位为：" + temp);
-
-        if((mlogo != "") && (mtype != "") && (certi_server.length() == 8) && (uid_server.length() == 14) && isSuccessfullyWritted)
-        {
-            OkHttp okHttp = new OkHttp(getApplicationContext(),mHandler);
-            /**
-             * 双证网络数据发送
-             */
-            if (mtype.equals("双证")) {
-                System.out.println("Dou-certi group number is " + cGroupNum);
-                /**
-                 * 双证有状态位网络数据发送
-                 */
-                if (temp != "") {
-                    RequestBody requestBody = new FormBody.Builder()
-                            .add("uid",uid_server)
-                            .add("certificate",certi_server)
-                            .add("obflag",temp)
-                            .add("brand",mlogo)
-                            .add("group_number",cGroupNum)
-                            .build();
-                    okHttp.postFromInternet(applyUrl,requestBody);
-                    /**
-                     * 双证无状态位网络数据发送
-                     */
-                } else {
-                    RequestBody requestBody = new FormBody.Builder()
-                            .add("uid",uid_server)
-                            .add("certificate",certi_server)
-                            .add("brand",mlogo)
-                            .add("group_number",cGroupNum)
-                            .build();
-                    okHttp.postFromInternet(applyUrl,requestBody);
-                }
-                /**
-                 * 单证网络数据发送
-                 */
-            } else {
-                /**
-                 * 单证有状态位网络数据发送
-                 */
-                if (temp != "") {
-                    RequestBody requestBody = new FormBody.Builder()
-                            .add("uid",uid_server)
-                            .add("certificate",certi_server)
-                            .add("obflag",temp)
-                            .add("brand",mlogo)
-                            .build();
-                    okHttp.postFromInternet(applyUrl,requestBody);
-                    /**
-                     * 单证无状态位网络数据发送
-                     */
-                } else {
-                    RequestBody requestBody = new FormBody.Builder()
-                            .add("uid",uid_server)
-                            .add("certificate",certi_server)
-                            .add("brand",mlogo)
-                            .build();
-                    okHttp.postFromInternet(applyUrl,requestBody);
+                    }
+                    SharedPreferences sharedPreferences = getSharedPreferences("decodecerti", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("decodeCerti",decodeCerti);
+                    editor.apply();
+                    System.out.print("解码复制的证书为：" + decodeCerti + "\n");
+                    if (isSuccessfullyRead) {
+                        tv_status.setText("证书复制成功");
+                    } else {
+                        tv_status.setText("证书复制失败");
+                    }
                 }
             }
-        }else{
-            Toast.makeText(CopyActivity.this, "请选择品牌或者单双证类型", Toast.LENGTH_SHORT).show();
-        }
+        });
+
+
+        iv_paste_tag.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String decodeCerti = "";
+                SharedPreferences preferences = getSharedPreferences("decodecerti",MODE_PRIVATE);
+                decodeCerti = preferences.getString("decodeCerti","");
+                writeTag(detectedTag,decodeCerti);
+                if (isSuccessfullyWritted) {
+                    tv_status.setText("证书粘贴成功");
+                } else {
+                    tv_status.setText("证书粘贴失败");
+                }
+            }
+        });
+
+
+
+//        SharedPreferences pf = getSharedPreferences("Info", MODE_PRIVATE);
+//        mlogo = pf.getString("Name", "");
+//        mtype = pf.getString("Type", "");
+
+        System.out.println("发给服务器的uid为：" + uid_server);
+//        System.out.println("发给服务器的证书为：" + certi_server);
+//        System.out.println("品牌为：" + mlogo + "   " + "发证类型为：" + mtype + "    " + "证书为：" + certi_server
+//                + " " + "uid为：" + uid_server + "    " + "状态位为：" + temp);
+
+//        if((mlogo != "") && (mtype != "") && (certi_server.length() == 8) && (uid_server.length() == 14) && isSuccessfullyWritted)
+//        {
+//            OkHttp okHttp = new OkHttp(getApplicationContext(),mHandler);
+//            /**
+//             * 双证网络数据发送
+//             */
+//            if (mtype.equals("双证")) {
+//                System.out.println("Dou-certi group number is " + cGroupNum);
+//                /**
+//                 * 双证有状态位网络数据发送
+//                 */
+//                if (temp != "") {
+//                    RequestBody requestBody = new FormBody.Builder()
+//                            .add("uid",uid_server)
+//                            .add("certificate",certi_server)
+//                            .add("obflag",temp)
+//                            .add("brand",mlogo)
+//                            .add("group_number",cGroupNum)
+//                            .build();
+//                    okHttp.postFromInternet(applyUrl,requestBody);
+//                    /**
+//                     * 双证无状态位网络数据发送
+//                     */
+//                } else {
+//                    RequestBody requestBody = new FormBody.Builder()
+//                            .add("uid",uid_server)
+//                            .add("certificate",certi_server)
+//                            .add("brand",mlogo)
+//                            .add("group_number",cGroupNum)
+//                            .build();
+//                    okHttp.postFromInternet(applyUrl,requestBody);
+//                }
+//                /**
+//                 * 单证网络数据发送
+//                 */
+//            } else {
+//                /**
+//                 * 单证有状态位网络数据发送
+//                 */
+//                if (temp != "") {
+//                    RequestBody requestBody = new FormBody.Builder()
+//                            .add("uid",uid_server)
+//                            .add("certificate",certi_server)
+//                            .add("obflag",temp)
+//                            .add("brand",mlogo)
+//                            .build();
+//                    okHttp.postFromInternet(applyUrl,requestBody);
+//                    /**
+//                     * 单证无状态位网络数据发送
+//                     */
+//                } else {
+//                    RequestBody requestBody = new FormBody.Builder()
+//                            .add("uid",uid_server)
+//                            .add("certificate",certi_server)
+//                            .add("brand",mlogo)
+//                            .build();
+//                    okHttp.postFromInternet(applyUrl,requestBody);
+//                }
+//            }
+//        }else{
+//            Toast.makeText(CopyActivity.this, "请选择品牌或者单双证类型", Toast.LENGTH_SHORT).show();
+//        }
 
         certi_server = "";
         uid_server = "";
@@ -218,7 +276,7 @@ public class CopyActivity extends BaseNfcActivity {
             isSuccessfullyWritted = true;
         } catch (Exception e) {
             System.out.println("非ndef写入异常");
-            Toast.makeText(CopyActivity.this,"NFC标签数据未读取成功，请将标签靠近手机NFC检测区域再次读取",Toast.LENGTH_SHORT).show();
+            Toast.makeText(this,"NFC标签数据未成功，请将标签靠近手机NFC检测区域再次读取",Toast.LENGTH_SHORT).show();
             isSuccessfullyWritted = false;
         } finally {
             try {
@@ -227,7 +285,40 @@ public class CopyActivity extends BaseNfcActivity {
             }
         }
     }
-
+    /**
+     * 读取非ndef数据
+     *
+     * @param tag
+     */
+    public String readTag(Tag tag) {
+        MifareUltralight ultralight = MifareUltralight.get(tag);
+        String certificate = "";
+        String temp = "";
+        if (tag != null) {
+            try {
+                ultralight.connect();
+                byte[] data = ultralight.readPages(22);
+                for (int i = 0;i < 4;i++) {
+                    temp = Integer.toHexString(data[i] & 0xFF);
+                    certificate += temp;
+                }
+                isSuccessfullyRead = true;
+                return certificate;
+            } catch (Exception e) {
+                e.printStackTrace();
+                isSuccessfullyRead = false;
+                Toast.makeText(this,"NFC标签数据未读取成功，请将标签靠近手机NFC检测区域再次读取",Toast.LENGTH_SHORT).show();
+            } finally {
+                try {
+                    ultralight.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+        return null;
+    }
     /**
      * 读uid和状态位
      * @param tag
@@ -390,4 +481,5 @@ public class CopyActivity extends BaseNfcActivity {
             System.out.println("状态位为：" + temp);
         }
     }
+
 }

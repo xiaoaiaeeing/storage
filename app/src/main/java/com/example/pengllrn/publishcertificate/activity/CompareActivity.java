@@ -119,6 +119,7 @@ public class CompareActivity extends BaseNfcActivity {
                 return certificate;
             } catch (Exception e) {
                 e.printStackTrace();
+                Toast.makeText(CompareActivity.this,"NFC标签数据未读取成功，请将标签靠近手机NFC检测区域再次读取",Toast.LENGTH_SHORT).show();
             } finally {
                 try {
                     ultralight.close();
