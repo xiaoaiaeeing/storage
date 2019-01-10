@@ -86,8 +86,23 @@ public class MainActivity extends BaseNfcActivity implements View.OnClickListene
         setContentView(R.layout.activity_main);
         initUI();
         initListener();
+    }
 
-
+    @Override
+    public void onResume() {
+        super.onResume();
+        mSelectTv.setText("品牌");
+        mtextview.setText("发证类型");
+        mPublishNum.setText("发证数量");
+        logo = "";
+        mtype = "";
+        publishNum = 0;
+        SharedPreferences sharedPreferences = getSharedPreferences("info", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("Name", logo);
+        editor.putString("Type", mtype);
+        editor.putInt("publishNum",publishNum);
+        editor.apply();
     }
 
     /**
@@ -154,11 +169,6 @@ public class MainActivity extends BaseNfcActivity implements View.OnClickListene
                 startActivity(intent);
                 break;
             case R.id.my_copy:
-//                SharedPreferences sharedpreferences = getSharedPreferences("Info", MODE_PRIVATE);
-//                SharedPreferences.Editor editor0 = sharedpreferences.edit();
-//                editor0.putString("Name", logo);
-//                editor0.putString("Type", mtype);
-//                editor0.apply();
                 intent = new Intent(MainActivity.this, CopyActivity.class);
                 startActivity(intent);
                 break;

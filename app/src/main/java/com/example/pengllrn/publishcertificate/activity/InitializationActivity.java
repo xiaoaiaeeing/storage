@@ -26,7 +26,7 @@ public class InitializationActivity extends BaseNfcActivity {
 
     @Override
     public void onNewIntent(Intent intent) {
-        mText = "!!!!";
+        mText = "\0\0\0\0";
         Tag detectedTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
 
         //写非NDEF格式的数据

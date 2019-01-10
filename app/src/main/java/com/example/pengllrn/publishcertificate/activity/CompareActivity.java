@@ -114,6 +114,9 @@ public class CompareActivity extends BaseNfcActivity {
                 byte[] data = ultralight.readPages(22);
                 for (int i = 0;i < 4;i++) {
                     temp = Integer.toHexString(data[i] & 0xFF);
+                    if (temp.length() == 1) {
+                        temp = "0" + temp;
+                    }
                     certificate += temp;
                 }
                 return certificate;

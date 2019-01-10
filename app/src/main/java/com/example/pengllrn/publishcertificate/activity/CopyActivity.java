@@ -11,6 +11,7 @@ import android.os.Message;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -53,51 +54,6 @@ public class CopyActivity extends BaseNfcActivity {
 
     private Tag detectedTag;
 
-//    Handler mHandler = new Handler() {
-//        @Override
-//        public void handleMessage(Message msg) {
-//            // TODO Auto-generated method stub
-//            switch (msg.what) {
-//                case 0x2017:
-//                    try {
-//                        String reponsedata = (msg.obj).toString();
-//                        int status = mParseJson.Json2TaggServer(reponsedata).getStatus();
-//                        String message = mParseJson.Json2TaggServer(reponsedata).getMsg();
-//                        String uid = mParseJson.Json2TaggServer(reponsedata).getTagg().getUid();
-//                        String certificate = mParseJson.Json2TaggServer(reponsedata).getTagg().getCertificate();
-//                        String obflag = mParseJson.Json2TaggServer(reponsedata).getTagg().getObflag();
-//                        String brand = mParseJson.Json2TaggServer(reponsedata).getTagg().getBrand();
-//                        String group_number = mParseJson.Json2TaggServer(reponsedata).getTagg().getGroup_number();
-//                        if (status == 0) {
-//                            Toast.makeText(CopyActivity.this, message, Toast.LENGTH_SHORT).show();
-//                            System.out.println("brand is ："
-//                                    + brand
-//                                    + "   "
-//                                    + "Group Number is ："
-//                                    + group_number
-//                                    + "    "
-//                                    + "certificate is："
-//                                    + certificate
-//                                    + " "
-//                                    + "uid is ："
-//                                    + uid + "    "
-//                                    + "  "
-//                                    + "obflag is ："
-//                                    + obflag
-//                                    +"\n");
-//                        }
-//                    } catch (Exception e) {
-//                        Toast.makeText(CopyActivity.this,"NFC标签数据未读取成功，请将标签靠近手机NFC检测区域再次读取",Toast.LENGTH_SHORT).show();
-//                    }
-//                    break;
-//                case 0x22:
-//                    Toast.makeText(CopyActivity.this,"网络请求延迟，发证失败",Toast.LENGTH_SHORT).show();
-//                    break;
-//            }
-//            super.handleMessage(msg);
-//        }
-//    };
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -117,6 +73,8 @@ public class CopyActivity extends BaseNfcActivity {
 
         //获取Tag对象
         detectedTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+        String isEmpty = detectedTag == null? "true":"false";
+        Log.d("detectedTag is empty?",isEmpty);
         analysisTag(detectedTag);
         if (detectedTag != null) {
             tv_status.setText("已检测到NFC标签，请在点击复制或粘贴按钮之前不要将手机远离NFC标签");
@@ -140,6 +98,8 @@ public class CopyActivity extends BaseNfcActivity {
         iv_copy_tag.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                String isEmpty = detectedTag == null? "true":"false";
+                Log.d("detectedTag is empty?",isEmpty);
                 String decodeCerti = "";
                 if (detectedTag != null) {
                     cText = readTag(detectedTag);
@@ -150,6 +110,7 @@ public class CopyActivity extends BaseNfcActivity {
                             String ele_decodeCerti = Character.toString(a);
                             decodeCerti += ele_decodeCerti;
                         }
+                        System.out.print("解码复制的证书为：" + decodeCerti + "\n");
                     } catch (Exception e) {
 
                     }
@@ -157,7 +118,6 @@ public class CopyActivity extends BaseNfcActivity {
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putString("decodeCerti",decodeCerti);
                     editor.apply();
-                    System.out.print("解码复制的证书为：" + decodeCerti + "\n");
                     if (isSuccessfullyRead) {
                         tv_status.setText("证书复制成功");
                     } else {
@@ -191,71 +151,6 @@ public class CopyActivity extends BaseNfcActivity {
 
         System.out.println("发给服务器的uid为：" + uid_server);
 //        System.out.println("发给服务器的证书为：" + certi_server);
-//        System.out.println("品牌为：" + mlogo + "   " + "发证类型为：" + mtype + "    " + "证书为：" + certi_server
-//                + " " + "uid为：" + uid_server + "    " + "状态位为：" + temp);
-
-//        if((mlogo != "") && (mtype != "") && (certi_server.length() == 8) && (uid_server.length() == 14) && isSuccessfullyWritted)
-//        {
-//            OkHttp okHttp = new OkHttp(getApplicationContext(),mHandler);
-//            /**
-//             * 双证网络数据发送
-//             */
-//            if (mtype.equals("双证")) {
-//                System.out.println("Dou-certi group number is " + cGroupNum);
-//                /**
-//                 * 双证有状态位网络数据发送
-//                 */
-//                if (temp != "") {
-//                    RequestBody requestBody = new FormBody.Builder()
-//                            .add("uid",uid_server)
-//                            .add("certificate",certi_server)
-//                            .add("obflag",temp)
-//                            .add("brand",mlogo)
-//                            .add("group_number",cGroupNum)
-//                            .build();
-//                    okHttp.postFromInternet(applyUrl,requestBody);
-//                    /**
-//                     * 双证无状态位网络数据发送
-//                     */
-//                } else {
-//                    RequestBody requestBody = new FormBody.Builder()
-//                            .add("uid",uid_server)
-//                            .add("certificate",certi_server)
-//                            .add("brand",mlogo)
-//                            .add("group_number",cGroupNum)
-//                            .build();
-//                    okHttp.postFromInternet(applyUrl,requestBody);
-//                }
-//                /**
-//                 * 单证网络数据发送
-//                 */
-//            } else {
-//                /**
-//                 * 单证有状态位网络数据发送
-//                 */
-//                if (temp != "") {
-//                    RequestBody requestBody = new FormBody.Builder()
-//                            .add("uid",uid_server)
-//                            .add("certificate",certi_server)
-//                            .add("obflag",temp)
-//                            .add("brand",mlogo)
-//                            .build();
-//                    okHttp.postFromInternet(applyUrl,requestBody);
-//                    /**
-//                     * 单证无状态位网络数据发送
-//                     */
-//                } else {
-//                    RequestBody requestBody = new FormBody.Builder()
-//                            .add("uid",uid_server)
-//                            .add("certificate",certi_server)
-//                            .add("brand",mlogo)
-//                            .build();
-//                    okHttp.postFromInternet(applyUrl,requestBody);
-//                }
-//            }
-//        }else{
-//            Toast.makeText(CopyActivity.this, "请选择品牌或者单双证类型", Toast.LENGTH_SHORT).show();
-//        }
 
         certi_server = "";
         uid_server = "";
@@ -300,6 +195,9 @@ public class CopyActivity extends BaseNfcActivity {
                 byte[] data = ultralight.readPages(22);
                 for (int i = 0;i < 4;i++) {
                     temp = Integer.toHexString(data[i] & 0xFF);
+                    if (temp.length() == 1) {
+                        temp = "0" + temp;
+                    }
                     certificate += temp;
                 }
                 isSuccessfullyRead = true;

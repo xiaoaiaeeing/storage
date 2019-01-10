@@ -20,32 +20,30 @@
             android:id="@+id/iv_copy_tag"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_weight="5"
             android:layout_gravity="center"
             android:layout_marginTop="20dp"
-            android:src="@drawable/copy2"/>
+            android:background="@drawable/copy_paste_bg"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_weight="2"
             android:text="复制"
-            android:layout_gravity="center"
-            android:textSize="24dp"/>
+            android:layout_gravity="center" />
         <ImageView
             android:id="@+id/iv_paste_tag"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_weight="5"
             android:layout_gravity="center"
             android:layout_marginTop="20dp"
-            android:src="@drawable/copy1"/>
+            android:background="@drawable/copy_paste_bg"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_weight="2"
             android:text="粘贴"
-            android:layout_gravity="center"
-            android:textSize="24dp"/>
+            android:layout_gravity="center" />
     </LinearLayout>
 
     <TextView
@@ -55,7 +53,6 @@
         android:layout_gravity="center"
         android:gravity="center"
         android:layout_weight="1"
-        android:textSize="24dp"
-        android:text="请将手机贴近标签，等待提示发证成功，则发证完成，若提示发证失败，请重新尝试。注意：若没有选择品牌和发证类型，将会导致发证失败" />
+        android:text="请将手机贴近标签，等待提示发证成功，则发证完成，若提示发证失败，请重新尝试。" />
 
 </LinearLayout>

@@ -52,7 +52,6 @@ public class WriteTextActivity extends BaseNfcActivity {
             switch (msg.what) {
                 case 0x2017:
                     try {
-                        publishNum += 1;
                         String reponsedata = (msg.obj).toString();
                         int status = mParseJson.Json2TaggServer(reponsedata).getStatus();
                         String message = mParseJson.Json2TaggServer(reponsedata).getMsg();
@@ -62,6 +61,7 @@ public class WriteTextActivity extends BaseNfcActivity {
                         String brand = mParseJson.Json2TaggServer(reponsedata).getTagg().getBrand();
                         String group_number = mParseJson.Json2TaggServer(reponsedata).getTagg().getGroup_number();
                         if (status == 0) {
+                            publishNum += 1;
                             Toast.makeText(WriteTextActivity.this, message, Toast.LENGTH_SHORT).show();
                             System.out.println("brand is ："
                                     + brand
@@ -101,7 +101,7 @@ public class WriteTextActivity extends BaseNfcActivity {
     }
     @Override
     public void onNewIntent(Intent intent) {
-        if (publishNum > maxPublishNum) {
+        if (publishNum >= maxPublishNum) {
             Toast.makeText(WriteTextActivity.this,"超过最大发证次数限制",Toast.LENGTH_SHORT).show();
             return;
         }
@@ -208,7 +208,7 @@ public class WriteTextActivity extends BaseNfcActivity {
                 }
             }
         }else{
-            Toast.makeText(WriteTextActivity.this, "请选择品牌,单双证类型或者发证次数", Toast.LENGTH_SHORT).show();
+            Toast.makeText(WriteTextActivity.this, "请选择品牌,单双证类型", Toast.LENGTH_SHORT).show();
         }
 
         num_zouyun = "";
