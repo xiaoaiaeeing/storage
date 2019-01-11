@@ -28,7 +28,10 @@ public class InitializationActivity extends BaseNfcActivity {
     public void onNewIntent(Intent intent) {
         mText = "\0\0\0\0";
         Tag detectedTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-
+        if (detectedTag == null) {
+            Toast.makeText(this,"NFC标签未探测成功，请将标签靠近手机NFC检测区域再次探测",Toast.LENGTH_SHORT).show();
+            return;
+        }
         //写非NDEF格式的数据
         String[] techList = detectedTag.getTechList();
         boolean haveMifareUltralight = false;
@@ -57,11 +60,11 @@ public class InitializationActivity extends BaseNfcActivity {
             ultralight.writePage(22, num.getBytes(Charset.forName("US-ASCII")));
 
             System.out.println("非ndef数据写入成功");
-            Toast.makeText(InitializationActivity.this,"标签初始化成功",Toast.LENGTH_SHORT).show();
+            Toast.makeText(this,"标签初始化成功",Toast.LENGTH_SHORT).show();
             isSuccessfullyWritted = true;
         } catch (Exception e) {
             System.out.println("非ndef写入异常");
-            Toast.makeText(InitializationActivity.this,"标签数据未初始化成功，请将标签靠近手机NFC检测区域再次初始化",Toast.LENGTH_SHORT).show();
+            Toast.makeText(this,"标签数据未初始化成功，请将标签靠近手机NFC检测区域再次初始化",Toast.LENGTH_SHORT).show();
             isSuccessfullyWritted = false;
         } finally {
             try {

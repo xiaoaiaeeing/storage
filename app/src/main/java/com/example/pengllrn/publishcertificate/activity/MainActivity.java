@@ -203,6 +203,7 @@ public class MainActivity extends BaseNfcActivity implements View.OnClickListene
         testData1.add("黄山徽商烟");
         testData1.add("九寨沟烟");
         testData1.add("阿玛尼服饰");
+        testData1.add("abcam");
         // 设置适配器
         testDataAdapter = new ArrayAdapter<String>(this, R.layout.popup_text_item, testData1);
         mTypeLv.setAdapter(testDataAdapter);

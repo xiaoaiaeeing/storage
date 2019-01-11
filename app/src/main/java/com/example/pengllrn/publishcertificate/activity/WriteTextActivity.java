@@ -62,7 +62,7 @@ public class WriteTextActivity extends BaseNfcActivity {
                         String group_number = mParseJson.Json2TaggServer(reponsedata).getTagg().getGroup_number();
                         if (status == 0) {
                             publishNum += 1;
-                            Toast.makeText(WriteTextActivity.this, message, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(WriteTextActivity.this, "发证成功", Toast.LENGTH_SHORT).show();
                             System.out.println("brand is ："
                                     + brand
                                     + "   "
@@ -80,7 +80,7 @@ public class WriteTextActivity extends BaseNfcActivity {
                                     +"\n");
                         }
                     } catch (Exception e) {
-                        Toast.makeText(WriteTextActivity.this,"NFC标签数据未读取成功，请将标签靠近手机NFC检测区域再次读取",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(WriteTextActivity.this,"NFC标签未探测成功，请将标签靠近手机NFC检测区域再次探测",Toast.LENGTH_SHORT).show();
                     }
                     break;
                 case 0x22:
@@ -102,7 +102,7 @@ public class WriteTextActivity extends BaseNfcActivity {
     @Override
     public void onNewIntent(Intent intent) {
         if (publishNum >= maxPublishNum) {
-            Toast.makeText(WriteTextActivity.this,"超过最大发证次数限制",Toast.LENGTH_SHORT).show();
+            Toast.makeText(this,"超过最大发证次数限制",Toast.LENGTH_SHORT).show();
             return;
         }
         getNum();
@@ -110,7 +110,10 @@ public class WriteTextActivity extends BaseNfcActivity {
             return;
         //获取Tag对象
         Tag detectedTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-
+        if (detectedTag == null) {
+            Toast.makeText(this,"NFC标签未探测成功，请将标签靠近手机NFC检测区域再次探测",Toast.LENGTH_SHORT).show();
+            return;
+        }
         analysisTag(detectedTag);
 
         //写非NDEF格式的数据
@@ -228,7 +231,7 @@ public class WriteTextActivity extends BaseNfcActivity {
             isSuccessfullyWritted = true;
         } catch (Exception e) {
             System.out.println("非ndef写入异常");
-            Toast.makeText(WriteTextActivity.this,"NFC标签数据未读取成功，请将标签靠近手机NFC检测区域再次读取",Toast.LENGTH_SHORT).show();
+            Toast.makeText(this,"NFC标签未探测成功，请将标签靠近手机NFC检测区域再次探测",Toast.LENGTH_SHORT).show();
             isSuccessfullyWritted = false;
         } finally {
             try {

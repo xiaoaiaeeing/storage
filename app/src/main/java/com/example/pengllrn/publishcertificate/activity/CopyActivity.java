@@ -79,6 +79,7 @@ public class CopyActivity extends BaseNfcActivity {
         if (detectedTag != null) {
             tv_status.setText("已检测到NFC标签，请在点击复制或粘贴按钮之前不要将手机远离NFC标签");
         } else {
+            Toast.makeText(this,"NFC标签未探测成功，请将标签靠近手机NFC检测区域再次探测",Toast.LENGTH_SHORT).show();
             return;
         }
         String[] techList = detectedTag.getTechList();
