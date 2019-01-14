@@ -3,10 +3,13 @@ package com.example.pengllrn.publishcertificate.activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
+import android.nfc.NdefMessage;
+import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.MifareUltralight;
 
+import android.nfc.tech.Ndef;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -17,6 +20,7 @@ import com.example.pengllrn.publishcertificate.base.BaseNfcActivity;
 import com.example.pengllrn.publishcertificate.constant.Constant;
 import com.example.pengllrn.publishcertificate.gson.ParseJson;
 import com.example.pengllrn.publishcertificate.internet.OkHttp;
+import com.example.pengllrn.publishcertificate.utils.UriPrefix;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -44,6 +48,7 @@ public class WriteTextActivity extends BaseNfcActivity {
     private boolean isSuccessfullyWritted = false;
     private int publishNum = 0;//发证的次数
     private int maxPublishNum = 0;//最大发证次数
+    private String mUri = "d156000139://\033\001\000\001\000\001\000\001\000\001\000";//aid的uri
 
     Handler mHandler = new Handler() {
         @Override
@@ -116,6 +121,16 @@ public class WriteTextActivity extends BaseNfcActivity {
         }
         analysisTag(detectedTag);
 
+        //写入NDEF数据(aid)
+        NdefMessage ndefMessage = new NdefMessage(new NdefRecord[]{createUriRecord(mUri)});
+        boolean result = writetag(ndefMessage, detectedTag);
+        if (result) {
+            Toast.makeText(this, "aid写入成功", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "aid写入失败", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         //写非NDEF格式的数据
         String[] techList = detectedTag.getTechList();
         boolean haveMifareUltralight = false;
@@ -131,6 +146,7 @@ public class WriteTextActivity extends BaseNfcActivity {
             return;
         }
         writeTag(detectedTag, mText);
+
 
         SharedPreferences pref = getSharedPreferences("info", MODE_PRIVATE);
         mlogo = pref.getString("Name", "");
@@ -220,6 +236,64 @@ public class WriteTextActivity extends BaseNfcActivity {
 
         num_zouyun = "";
         uid_zouyun = "";
+    }
+
+    /**
+     * 将Uri转成NdefRecord
+     *
+     * @param uriStr
+     * @return
+     */
+    public static NdefRecord createUriRecord(String uriStr) {
+        byte prefix = 0;
+        for (Byte b : UriPrefix.URI_PREFIX_MAP.keySet()) {
+            String prefixStr = UriPrefix.URI_PREFIX_MAP.get(b).toLowerCase();
+            if ("".equals(prefixStr))
+                continue;
+            if (uriStr.toLowerCase().startsWith(prefixStr)) {
+                prefix = b;
+                uriStr = uriStr.substring(prefixStr.length());
+                break;
+            }
+        }
+        byte[] data = new byte[1 + uriStr.length()];
+        data[0] = prefix;
+        System.arraycopy(uriStr.getBytes(), 0, data, 1, uriStr.length());
+        NdefRecord record = new NdefRecord(NdefRecord.TNF_WELL_KNOWN, NdefRecord.RTD_URI, new byte[0], data);
+        return record;
+    }
+
+    /**
+     * 写入ndef数据(aid)
+     *
+     * @param message
+     * @param tag
+     * @return
+     */
+    public static boolean writetag(NdefMessage message, Tag tag) {
+        int size = message.toByteArray().length;
+        Ndef ndef = Ndef.get(tag);
+        try {
+            if (ndef != null) {
+                ndef.connect();
+                if (!ndef.isWritable()) {
+                    return false;
+                }
+                if (ndef.getMaxSize() < size) {
+                    return false;
+                }
+                ndef.writeNdefMessage(message);
+                return true;
+            }
+        } catch (Exception e) {
+        } finally {
+            try {
+                ndef.close();
+            } catch (Exception e) {
+
+            }
+        }
+        return false;
     }
 
     /** 写非ndef格式数据
