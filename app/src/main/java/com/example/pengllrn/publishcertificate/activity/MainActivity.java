@@ -64,6 +64,7 @@ public class MainActivity extends BaseNfcActivity implements View.OnClickListene
     private ImageView imageView2;   //复制
     private ImageView imageView3;   //复制比对
     private ImageView imageView4;   //初始化
+    private ImageView imageView5;   //aid写入
 
     /**
      * 保存随机数
@@ -116,6 +117,7 @@ public class MainActivity extends BaseNfcActivity implements View.OnClickListene
         imageView2 = (ImageView) findViewById(R.id.my_copy);
         imageView3 = (ImageView) findViewById(R.id.my_compare);
         imageView4 = (ImageView) findViewById(R.id.my_initialization);
+        imageView5 = (ImageView) findViewById(R.id.center_view);
     }
 
     /**
@@ -129,6 +131,7 @@ public class MainActivity extends BaseNfcActivity implements View.OnClickListene
         imageView2.setOnClickListener(this);
         imageView3.setOnClickListener(this);
         imageView4.setOnClickListener(this);
+        imageView5.setOnClickListener(this);
     }
 
     @Override
@@ -179,6 +182,11 @@ public class MainActivity extends BaseNfcActivity implements View.OnClickListene
             case R.id.my_initialization:
                 intent = new Intent(MainActivity.this,InitializationActivity.class);
                 startActivity(intent);
+                break;
+            case R.id.center_view:
+                intent = new Intent(MainActivity.this,AidPublishActivity.class);
+                startActivity(intent);
+                break;
             default:
                 break;
         }

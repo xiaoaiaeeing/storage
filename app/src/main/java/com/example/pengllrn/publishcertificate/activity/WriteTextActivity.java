@@ -137,10 +137,14 @@ public class WriteTextActivity extends BaseNfcActivity {
         mtype = pref.getString("Type", "");
 
         /** 得到发给服务器的证书号*/
-        for(int i = 0; i < 4; i++){
-            char a = mText.charAt(i);
-            String mstr = "3" + a;
-            num_zouyun = num_zouyun + mstr;
+        try {
+            for(int i = 0; i < 4; i++){
+                char a = mText.charAt(i);
+                String mstr = "3" + a;
+                num_zouyun = num_zouyun + mstr;
+            }
+        } catch (Exception e) {
+
         }
 
         System.out.println("拼接过后的证书为：" + num_zouyun);

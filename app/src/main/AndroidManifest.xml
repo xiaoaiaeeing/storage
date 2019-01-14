@@ -40,7 +40,11 @@
             android:launchMode="singleTop" />
         <activity
             android:name=".activity.InitializationActivity"
-            android:launchMode="singleTop"></activity>
+            android:launchMode="singleTop" />
+        <activity
+            android:name=".activity.AidPublishActivity"
+            android:launchMode="singleTop">
+        </activity>
     </application>
 
 </manifest>
